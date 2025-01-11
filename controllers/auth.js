@@ -1,9 +1,74 @@
 const { promisify } = require('util');
+const unirest = require('unirest');
+const twilio = require('twilio');
+const AWS = require('aws-sdk');
 const jwt = require('jsonwebtoken');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
+
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: 'ap-south-1',
+});
+
+const client = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN,
+);
+const sns = new AWS.SNS();
+
+// Generate OTP
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+// Store OTP in memory for simplicity (consider using a database or cache in production)
+const otpStore = {};
+
+exports.sendOTP = catchAsync(async (req, res, next) => {
+  const { mobile } = req.body;
+
+  if (!mobile) {
+    return next(new AppError('Please provide a mobile number', 400));
+  }
+
+  const generatedOTP = generateOTP();
+  otpStore[mobile] = generatedOTP;
+
+  try {
+    const message = await client.messages.create({
+      body: `Your OTP for login is ${generatedOTP}`,
+      from: process.env.TWILIO_PHONE_NUMBER, // Your Twilio phone number
+      to: `+91${mobile}`, // Ensure the phone number includes the country code
+    });
+
+    // const result = await sns
+    //   .publish({
+    //     Message: `Your OTP for login is ${generatedOTP}`,
+    //     PhoneNumber: `+91884086555`, // Ensure the phone number includes the country code
+    //     MessageAttributes: {
+    //       'AWS.SNS.SMS.SMSType': {
+    //         DataType: 'String',
+    //         StringValue: 'Transactional', // Set to 'Promotional' if applicable
+    //       },
+    //     },
+    //   })
+    //   .promise();
+
+    // console.log('SNS publish result:', result);
+
+    res.status(200).json({
+      status: 'success',
+      otp: generatedOTP,
+      message: message,
+    });
+  } catch (error) {
+    console.error('Error sending OTP via SNS:', error);
+    return next(new AppError('Failed to send OTP', 500));
+  }
+});
 
 // Utility methods
 const signToken = (id) => {
@@ -12,16 +77,14 @@ const signToken = (id) => {
   });
 };
 
-
 exports.signup = catchAsync(async (req, res, next) => {
-  const hashedPassword = await bcrypt.hash(req.body.password, 12);
-
   const newUser = await User.create({
-    username: req.body.username,
+    name: req.body.name,
     email: req.body.email,
-    password: hashedPassword,
-    passwordConfirm: hashedPassword,
-    passwordChangedAt: req.body.passwordChangedAt || Date.now(),
+    mobile: req.body.mobile,
+    avatar: req.body.avatar,
+    addresses: req.body.addresses,
+    orders: req.body.orders,
   });
 
   const token = signToken(newUser._id);
@@ -36,28 +99,30 @@ exports.signup = catchAsync(async (req, res, next) => {
 });
 
 exports.login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { mobile, otp } = req.body;
 
-  // 1. Check if user exists
-  if (!email || !password) {
-    return next(new AppError('Please provide the email and password', 400));
+  if (!mobile || !otp) {
+    return next(new AppError('Please provide mobile number and OTP', 400));
   }
 
-  // 2. Match the credentails
-  const user = await User.findOne({ email }).select('+password');
+  if (otpStore[mobile] && otpStore[mobile] === otp) {
+    // OTP is valid, generate JWT
+    const user = await User.findOne({ mobile });
+    if (!user) {
+      return next(new AppError('User not found', 404));
+    }
 
-  if (!user || !(await user.correctPassword(password, user.password))) {
-    return next(new AppError('Incorrect email or password', 401));
+    const token = signToken(user._id);
+    delete otpStore[mobile]; // Clear OTP after successful verification
+
+    return res.status(200).json({
+      status: 'success',
+      token,
+      data: { user },
+    });
+  } else {
+    return next(new AppError('Invalid OTP', 400));
   }
-
-  // 3. Send JWT
-  const token = signToken(user._id);
-
-  res.status(200).json({
-    status: 'success',
-    token,
-    data: { user },
-  });
 });
 
 /*

@@ -1,33 +1,49 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
-  username: {
+  name: {
     type: String,
     required: true,
-    unique: true,
-    trim: true,
   },
   email: {
     type: String,
     required: true,
     unique: true,
     trim: true,
+    validate: {
+      validator: function (v) {
+        return validator.isEmail(v);
+      },
+      message: (props) => `${props.value} is not a valid email!`,
+    },
   },
-  password: {
+  mobile: {
     type: String,
     required: true,
+    validate: {
+      validator: function (v) {
+        return validator.isMobilePhone(v, 'en-IN');
+      },
+      message: (props) => `${props.value} is not a valid phone number!`,
+    },
   },
-  band: {
+  avatar: {
     type: String,
-    required: true,
-    enum: [1, 2, 3],
-    default: 3,
+    default: '/drawables/default_avatar.svg',
   },
-  clients: [
+  addresses: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Client',
+      ref: 'Address',
+      default: [],
+    },
+  ],
+  orders: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Order',
+      default: [], // Empty array
     },
   ],
   createdAt: {
@@ -37,24 +53,6 @@ const userSchema = new mongoose.Schema({
 });
 
 // Instance methods
-userSchema.methods.correctPassword = async function (
-  candidatePassword,
-  userPassword,
-) {
-  return await bcrypt.compare(candidatePassword, userPassword);
-};
-
-userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
-  if (this.passwordChangedAt) {
-    const changedTimeStampAt = parseInt(
-      this.passwordChangedAt.getTime() / 1000,
-      10,
-    );
-    return JWTTimestamp < changedTimeStampAt;
-  }
-
-  return false;
-};
 
 const User = mongoose.model('User', userSchema);
 

@@ -7,6 +7,8 @@
     "start:dev": "nodemon server.js"
   },
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.726.1",
+    "aws-sdk": "^2.1692.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "circular-json": "^0.5.9",
@@ -21,8 +23,9 @@
     "nodemon": "^3.0.3",
     "sequelize": "^6.35.1",
     "socket.io": "^4.7.4",
-    "twilio": "^4.21.0",
-    "validator": "^13.11.0"
+    "twilio": "^4.23.0",
+    "unirest": "^0.6.0",
+    "validator": "^13.12.0"
   },
   "devDependencies": {
     "eslint": "^8.53.0",
