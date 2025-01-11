@@ -1,11 +1,14 @@
 const { promisify } = require('util');
 const unirest = require('unirest');
+const axios = require('axios');
 const twilio = require('twilio');
 const AWS = require('aws-sdk');
 const jwt = require('jsonwebtoken');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const User = require('../models/User');
+const { type } = require('os');
+const { response } = require('express');
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -37,35 +40,59 @@ exports.sendOTP = catchAsync(async (req, res, next) => {
   const generatedOTP = generateOTP();
   otpStore[mobile] = generatedOTP;
 
+  // try {
+  //   const requestPayload = {
+  //     messaging_product: 'whatsapp',
+  //     to: `+91${mobile}`, // Ensure the phone number includes the country code
+  //     type: 'text',
+  //     text: {
+  //       body: `Your OTP for login is ${generatedOTP}`,
+  //     },
+  //   };
+
+  //   console.log('Request Payload:', requestPayload);
+
+  //   const response = await axios({
+  //     url: process.env.WHATSAPP_API_URL,
+  //     method: 'post',
+  //     headers: {
+  //       Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
+  //       'Content-Type': 'application/json',
+  //     },
+  //     data: requestPayload,
+  //   });
+
+  //   console.log('WhatsApp API response:', response.data);
+
+  //   res.status(200).json({
+  //     status: 'success',
+  //     otp: generatedOTP,
+  //     message: 'OTP sent successfully',
+  //   });
+  // } catch (error) {
+  //   console.error(
+  //     'Error sending OTP via WhatsApp:',
+  //     error.response ? error.response.data : error.message,
+  //   );
+  //   return next(new AppError('Failed to send OTP', 500));
+  // }
+
   try {
-    const message = await client.messages.create({
-      body: `Your OTP for login is ${generatedOTP}`,
-      from: process.env.TWILIO_PHONE_NUMBER, // Your Twilio phone number
-      to: `+91${mobile}`, // Ensure the phone number includes the country code
-    });
-
-    // const result = await sns
-    //   .publish({
-    //     Message: `Your OTP for login is ${generatedOTP}`,
-    //     PhoneNumber: `+91884086555`, // Ensure the phone number includes the country code
-    //     MessageAttributes: {
-    //       'AWS.SNS.SMS.SMSType': {
-    //         DataType: 'String',
-    //         StringValue: 'Transactional', // Set to 'Promotional' if applicable
-    //       },
-    //     },
-    //   })
-    //   .promise();
-
-    // console.log('SNS publish result:', result);
+    client.verify.v2
+      .services('VA1fd9a7c66864d35698a82ef0ee9f088f')
+      .verifications.create({ to: `+91${mobile}`, channel: 'sms' })
+      .then((verification) => console.log(verification.sid));
 
     res.status(200).json({
       status: 'success',
       otp: generatedOTP,
-      message: message,
+      message: 'OTP sent successfully',
     });
   } catch (error) {
-    console.error('Error sending OTP via SNS:', error);
+    console.error(
+      'Error sending OTP via WhatsApp:',
+      error.response ? error.response.data : error.message,
+    );
     return next(new AppError('Failed to send OTP', 500));
   }
 });
