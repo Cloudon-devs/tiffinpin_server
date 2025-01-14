@@ -41,6 +41,53 @@ exports.getMeal = catchAsync(async (req, res) => {
   });
 });
 
+exports.getMealsForCurrentDate = catchAsync(async (req, res) => {
+  const currentDate = new Date();
+  const localDate = new Date(
+    currentDate.getTime() - currentDate.getTimezoneOffset() * 60000,
+  )
+    .toISOString()
+    .split('T')[0]; // Get current date in local time zone in YYYY-MM-DD format
+
+  const meals = await Meal.find().populate('dishes');
+
+  // Filter meals based on the formatted date
+  const filteredMeals = meals.filter((meal) => {
+    const mealDate = meal.date.toISOString().split('T')[0];
+    return mealDate === localDate;
+  });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      meals: filteredMeals,
+    },
+  });
+});
+
+exports.getMealsForCurrentDateAndTime = catchAsync(async (req, res) => {
+  const currentDate = new Date();
+  const localDate = new Date(
+    currentDate.getTime() - currentDate.getTimezoneOffset() * 60000,
+  )
+    .toISOString()
+    .split('T')[0]; // Get current date in YYYY-MM-DD format
+  const currentHour = new Date().getHours(); // Get current hour
+
+  const meals = await Meal.find({
+    date: localDate,
+    start_hour: { $lte: currentHour },
+    end_hour: { $gte: currentHour },
+  }).populate('dishes');
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      meals,
+    },
+  });
+});
+
 // Update a meal by ID
 exports.updateMeal = catchAsync(async (req, res) => {
   const meal = await Meal.findByIdAndUpdate(req.params.id, req.body, {

@@ -43,14 +43,34 @@ const mealSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  date: {
+    type: Date,
+    required: true,
+    set: (value) => {
+      // Ensure the date is stored in YYYY-MM-DD format
+      return new Date(value).toISOString().split('T')[0];
+    },
+  },
+  start_hour: {
+    type: Number,
+    required: true,
+  },
+  end_hour: {
+    type: Number,
+    required: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
 
-// Instance methods
+// Virtual property to format the date as YYYY-MM-DD
+mealSchema.virtual('formattedDate').get(function () {
+  return this.date.toISOString().split('T')[0];
+});
 
-const Meal = mongoose.model('Meal', mealSchema);
+mealSchema.set('toJSON', { virtuals: true });
+mealSchema.set('toObject', { virtuals: true });
 
-module.exports = Meal;
+module.exports = mongoose.model('Meal', mealSchema);
