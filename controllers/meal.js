@@ -74,7 +74,7 @@ exports.getMealsForCurrentDateAndTime = catchAsync(async (req, res) => {
     .split('T')[0]; // Get current date in local time zone in YYYY-MM-DD format
 
   const localTime = new Date(
-    currentDate.getTime() - currentDate.getTimezoneOffset() * 60000,
+    currentDate.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }),
   );
   const currentHour = localTime.getHours(); // Get current hour in local time
 
