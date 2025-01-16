@@ -4,6 +4,12 @@ const catchAsync = require('../utils/catchAsync');
 // Create a new address
 exports.createAddress = catchAsync(async (req, res) => {
   const newAddress = await Address.create(req.body);
+
+  // Update the user's address array
+  await User.findByIdAndUpdate(req.user.id, {
+    $push: { addresses: newAddress._id },
+  });
+
   res.status(201).json({
     status: 'success',
     data: {
@@ -37,6 +43,18 @@ exports.getAddress = catchAsync(async (req, res) => {
     status: 'success',
     data: {
       address,
+    },
+  });
+});
+
+exports.getAllAddressesByUserId = catchAsync(async (req, res) => {
+  const userId = req.user.id;
+  const addresses = await Address.find({ user_id: req.params.user_id });
+  res.status(200).json({
+    status: 'success',
+    results: addresses.length,
+    data: {
+      addresses,
     },
   });
 });

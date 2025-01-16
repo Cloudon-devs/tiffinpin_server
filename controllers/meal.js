@@ -71,8 +71,11 @@ exports.getMealsForCurrentDateAndTime = catchAsync(async (req, res) => {
     currentDate.getTime() - currentDate.getTimezoneOffset() * 60000,
   )
     .toISOString()
-    .split('T')[0]; // Get current date in YYYY-MM-DD format
+    .split('T')[0]; // Get current date in local time zone in YYYY-MM-DD format
   const currentHour = new Date().getHours(); // Get current hour
+
+  console.log('Current local date: ', localDate);
+  console.log('Current local time: ', currentHour);
 
   const meals = await Meal.find({
     date: localDate,

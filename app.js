@@ -9,6 +9,7 @@ const usersRouter = require('./routes/user');
 const dishRouter = require('./routes/dish');
 const mealRouter = require('./routes/meal');
 const orderRouter = require('./routes/order');
+const addressRouter = require('./routes/address');
 const transactionRouter = require('./routes/transaction');
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/v1/auth', authRouter); // Route mounting
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/dish', dishRouter);
 app.use('/api/v1/meal', mealRouter);
+app.use('/api/v1/address', addressRouter);
 app.use('/api/v1/transaction', transactionRouter);
 app.use('/api/v1/order', orderRouter);
 
