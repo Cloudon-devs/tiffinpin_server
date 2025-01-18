@@ -7,7 +7,7 @@ const router = express.Router();
 router
   .route('/')
   .get(addressController.getAllAddresses)
-  .post(addressController.createAddress);
+  .post(authController.protect, addressController.createAddress);
 
 router
   .route('/')

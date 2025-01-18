@@ -1,12 +1,15 @@
 const Address = require('../models/Address');
+const User = require('../models/User');
 const catchAsync = require('../utils/catchAsync');
 
 // Create a new address
 exports.createAddress = catchAsync(async (req, res) => {
+  req.body.user_id = req.user.id;
+
   const newAddress = await Address.create(req.body);
 
   // Update the user's address array
-  await User.findByIdAndUpdate(req.user.id, {
+  const user = await User.findByIdAndUpdate(req.user._id, {
     $push: { addresses: newAddress._id },
   });
 
@@ -49,7 +52,10 @@ exports.getAddress = catchAsync(async (req, res) => {
 
 exports.getAllAddressesByUserId = catchAsync(async (req, res) => {
   const userId = req.user.id;
-  const addresses = await Address.find({ user_id: req.params.user_id });
+  const addresses = await Address.find({ user_id: userId }).populate({
+    path: 'user_id',
+    select: 'name email',
+  });
   res.status(200).json({
     status: 'success',
     results: addresses.length,

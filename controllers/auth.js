@@ -191,10 +191,10 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // 1. Check if token present
   if (
-    req.headers.authorisation &&
-    req.headers.authorisation.startsWith('Bearer')
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
   ) {
-    token = req.headers.authorisation.split(' ')[1];
+    token = req.headers.authorization.split(' ')[1];
   }
 
   if (!token) {
@@ -217,7 +217,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
 
   // 4. Check if the password changed after jwt issued
-  if (currentUser.changedPasswordAfter(decoded.iat)) {
+  if (currentUser?.changedPasswordAfter(decoded.iat)) {
     return next(
       new AppError(
         'User recently changed the password! Please login again',
