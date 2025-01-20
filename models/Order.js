@@ -7,11 +7,13 @@ const orderSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  meals: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Meal',
-    required: true,
-  }],
+  meals: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Meal',
+      required: true,
+    },
+  ],
   transaction: {
     type: Schema.Types.ObjectId,
     ref: 'Transaction',
@@ -20,6 +22,12 @@ const orderSchema = new mongoose.Schema({
   date: {
     type: Date,
     required: true,
+    default: () => {
+      const currentDate = new Date();
+      return new Date(
+        currentDate.getTime() - currentDate.getTimezoneOffset() * 60000,
+      );
+    },
   },
   time: {
     type: String,

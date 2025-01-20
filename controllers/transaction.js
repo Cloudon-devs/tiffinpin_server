@@ -1,5 +1,32 @@
 const Transaction = require('../models/Transaction');
 const catchAsync = require('../utils/catchAsync');
+const crypto = require('crypto');
+
+exports.verifyPayment = catchAsync(async (req, res, next) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+  const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
+  hmac.update(`${razorpay_order_id}|${razorpay_payment_id}`);
+  const generatedSignature = hmac.digest('hex');
+
+  if (generatedSignature !== razorpay_signature) {
+    return next(new AppError('Payment verification failed', 400));
+  }
+
+  // Update order status in your database
+  const order = await Order.findOneAndUpdate(
+    { razorpay_order_id },
+    { status: 'paid', razorpay_payment_id, razorpay_signature },
+    { new: true }
+  );
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      order,
+    },
+  });
+});
 
 // Create a new transaction
 exports.createTransaction = catchAsync(async (req, res) => {
