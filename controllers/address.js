@@ -52,6 +52,9 @@ exports.getAddress = catchAsync(async (req, res) => {
 
 exports.getAllAddressesByUserId = catchAsync(async (req, res) => {
   const userId = req.user.id;
+
+  console.log('Coming user id: ', userId);
+
   const addresses = await Address.find({ user_id: userId }).populate({
     path: 'user_id',
     select: 'name email',

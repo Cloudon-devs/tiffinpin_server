@@ -48,7 +48,7 @@ exports.verifyPayment = catchAsync(async (req, res, next) => {
   // Create a new order in your database
   const newOrder = await Order.create({
     ...req.body,
-    user_id: req.user.id, // Use the user ID from the token
+    user_id: req.user.id,
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature,
@@ -63,9 +63,36 @@ exports.verifyPayment = catchAsync(async (req, res, next) => {
   });
 });
 
+/* 
+  Create COD Order
+*/
+exports.createCodOrder = catchAsync(async (req, res, next) => {
+  const { meals, total_price, amount, currency, receipt } = req.body;
+
+  // Create a new order in your database
+  const newOrder = await Order.create({
+    user: req.user.id,
+    meals: meals.map((meal) => meal.meal_id),
+    total_price,
+    amount,
+    currency,
+    receipt,
+    status: 'pending',
+    payment_method: 'COD',
+    time: new Date().toTimeString().split(' ')[0],
+  });
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      order: newOrder,
+    },
+  });
+});
+
 // Get all orders
 exports.getAllOrders = catchAsync(async (req, res) => {
-  const orders = await Order.find().populate('user meal transaction');
+  const orders = await Order.find().populate('meals');
   res.status(200).json({
     status: 'success',
     results: orders.length,

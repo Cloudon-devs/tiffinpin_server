@@ -5,6 +5,10 @@ const orderController = require('../controllers/order');
 const router = express.Router();
 
 router
+  .route('/create-cod-order')
+  .post(authController.protect, orderController.createCodOrder);
+
+router
   .route('/create-razorpay-order')
   .post(authController.protect, orderController.createRazorpayOrder);
 

@@ -17,7 +17,6 @@ const orderSchema = new mongoose.Schema({
   transaction: {
     type: Schema.Types.ObjectId,
     ref: 'Transaction',
-    required: true,
   },
   date: {
     type: Date,
