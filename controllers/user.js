@@ -15,7 +15,21 @@ exports.getAllUsers = catchAsync(async (req, res) => {
 });
 
 exports.getUser = catchAsync(async (req, res) => {
-  const user = await User.findById(req.params.id);
+  // Extract the token from the Authorization header
+  const token = req.headers.authorization.split(' ')[1];
+  // Verify the token and extract the user ID
+  const decoded = jwt.verify(token, process.env.JWT_SECRET); // Use your JWT secret
+  const userId = decoded.id;
+
+  // Find the user by ID
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'User not found',
+    });
+  }
 
   res.status(200).json({
     status: 'success',

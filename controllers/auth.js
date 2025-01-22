@@ -9,11 +9,21 @@ const AppError = require('./../utils/appError');
 const User = require('../models/User');
 const { type } = require('os');
 const { response } = require('express');
+const { OAuth2Client } = require('google-auth-library');
+const client_google = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const admin = require('firebase-admin');
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   region: 'ap-south-1',
+});
+
+admin.initializeApp({
+  credential: admin.credential.cert(
+    require('../credentials/firebase_sdk.json'),
+  ),
 });
 
 const client = twilio(
@@ -186,10 +196,77 @@ exports.updateUser = catchAsync(async (req, res) => {
   });
 });
 
+// const verifyGoogleToken = async (token) => {
+//   try {
+//     console.log('Verifying token:', token); // Log the token value
+
+//     const response = await axios.get(
+//       `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${token}`,
+//     );
+//     const ticket = response.data;
+
+//     console.log('Ticket:', ticket);
+
+//     if (!ticket || ticket.aud !== process.env.GOOGLE_CLIENT_ID) {
+//       throw new Error('Invalid token');
+//     }
+
+//     return ticket;
+//   } catch (error) {
+//     console.error('Error verifying Google token:', error); // Log the error
+//     throw error;
+//   }
+// };
+
+const verifyFirebaseToken = async (idToken) => {
+  try {
+    console.log('Verifying Firebase token:', idToken);
+
+    // Verify the Firebase token
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+
+    console.log('Decoded Token:', decodedToken);
+
+    // Check if the user already exists
+    let user = await User.findOne({ firebaseUid: decodedToken.uid });
+    if (!user) {
+      // Create a new user in the database with details from the decoded token
+      user = await User.create({
+        firebaseUid: decodedToken.uid,
+        name: decodedToken.name,
+        email: decodedToken.email,
+        mobile: decodedToken.phone_number,
+        avatar: decodedToken.picture,
+      });
+
+      console.log('New User:', user);
+    } else {
+      console.log('User already exists:', user);
+    }
+
+    // Return the decoded token information
+    return decodedToken;
+  } catch (error) {
+    if (error.code === 'auth/id-token-expired') {
+      console.error(
+        'Firebase ID token has expired. Please obtain a new token and try again.',
+      );
+      throw new Error(
+        'Firebase ID token has expired. Please obtain a new token and try again.',
+      );
+    } else {
+      console.error('Error verifying Firebase token:', error);
+      throw error;
+    }
+  }
+};  
+
+const verifyJwtToken = async (token) => {
+  return await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+};
+
 exports.protect = catchAsync(async (req, res, next) => {
   let token;
-
-  // 1. Check if token present
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
@@ -199,34 +276,22 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   if (!token) {
     return next(
-      new AppError(
-        'You are not logged in! Please login to get the complete access',
-        401,
-      ),
+      new AppError('You are not logged in! Please log in to get access.', 401),
     );
   }
 
-  // 2. Verify token
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-
-  // 3. Check if user exists
-  const currentUser = await User.findById(decoded.id);
-  if (!currentUser)
-    return next(
-      new AppError('The user belonging to this ID no longer exists', 401),
-    );
-
-  // 4. Check if the password changed after jwt issued
-  if (currentUser?.changedPasswordAfter(decoded.iat)) {
-    return next(
-      new AppError(
-        'User recently changed the password! Please login again',
-        401,
-      ),
-    );
+  let decoded;
+  try {
+    decoded = await verifyJwtToken(token);
+  } catch (err) {
+    try {
+      console.log('Comoing');
+      decoded = await verifyFirebaseToken(token);
+    } catch (googleErr) {
+      return next(new AppError('Invalid token. Please log in again.', 401));
+    }
   }
 
-  // GRANT ACCESS TO PROTECTED ROUTE
-  req.user = currentUser;
+  req.user = decoded;
   next();
 });

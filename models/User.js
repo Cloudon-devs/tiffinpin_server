@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
+  firebaseUid: {
+    type: String,
+    unique: true,
+  },
   name: {
     type: String,
     required: true,
@@ -20,7 +24,7 @@ const userSchema = new mongoose.Schema({
   },
   mobile: {
     type: String,
-    required: true,
+    // required: true,
     validate: {
       validator: function (v) {
         return validator.isMobilePhone(v, 'en-IN');
