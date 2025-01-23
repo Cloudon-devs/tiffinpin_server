@@ -67,17 +67,17 @@ exports.verifyPayment = catchAsync(async (req, res, next) => {
   Create COD Order
 */
 exports.createCodOrder = catchAsync(async (req, res, next) => {
-  const { meals, total_price, amount, currency, receipt } = req.body;
+  const { meals, price, amount, currency, receipt, status } = req.body;
 
   // Create a new order in your database
   const newOrder = await Order.create({
     user: req.user.id,
     meals: meals.map((meal) => meal.meal_id),
-    total_price,
+    price,
     amount,
     currency,
     receipt,
-    status: 'pending',
+    status,
     payment_method: 'COD',
     time: new Date().toTimeString().split(' ')[0],
   });

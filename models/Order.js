@@ -37,6 +37,11 @@ const orderSchema = new mongoose.Schema({
     enum: ["Preparing", "Out For Delivery", "Delivered", "Cancelled"],
     reequired: true
   },
+  payment_method: {
+    type: String,
+    enum: ["COD", "Prepaid"],
+    required: true
+  },
   price: {
     type: Number,
   },
