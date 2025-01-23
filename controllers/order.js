@@ -90,6 +90,20 @@ exports.createCodOrder = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.getUserOrders = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+
+  const orders = await Order.find({ user: userId }).populate('meals');
+
+  res.status(200).json({
+    status: 'success',
+    results: orders.length,
+    data: {
+      orders,
+    },
+  });
+});
+
 // Get all orders
 exports.getAllOrders = catchAsync(async (req, res) => {
   const orders = await Order.find().populate('meals');

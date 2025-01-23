@@ -32,6 +32,14 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  status: {
+    type: String,
+    enum: ["Preparing", "Out For Delivery", "Delivered", "Cancelled"],
+    reequired: true
+  },
+  price: {
+    type: Number,
+  },
   timstamp: {
     type: Date,
     default: Date.now,

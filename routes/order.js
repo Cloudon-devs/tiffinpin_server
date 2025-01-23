@@ -16,7 +16,7 @@ router
   .route('/verify-payment')
   .post(authController.protect, orderController.verifyPayment);
 
-router.route('/').get(orderController.getAllOrders);
+router.get('/user-orders', authController.protect, orderController.getUserOrders);
 
 router
   .route('/:id')
