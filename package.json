@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-sns": "^3.726.1",
+    "@supabase/supabase-js": "^2.48.1",
     "aws-sdk": "^2.1692.0",
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",

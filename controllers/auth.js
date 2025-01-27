@@ -11,8 +11,13 @@ const { type } = require('os');
 const { response } = require('express');
 const { OAuth2Client } = require('google-auth-library');
 const client_google = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const { createClient } = require('@supabase/supabase-js');
 
 const admin = require('firebase-admin');
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY,
+);
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -32,79 +37,88 @@ const client = twilio(
 );
 const sns = new AWS.SNS();
 
-// Generate OTP
-const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-};
-
 // Store OTP in memory for simplicity (consider using a database or cache in production)
 const otpStore = {};
 
-exports.sendOTP = catchAsync(async (req, res, next) => {
-  const { mobile } = req.body;
+const generateOtp = () => {
+  const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
-  if (!mobile) {
-    return next(new AppError('Please provide a mobile number', 400));
-  }
+  console.log('OTP: ', otp);
 
-  const generatedOTP = generateOTP();
-  otpStore[mobile] = generatedOTP;
+  return otp;
+};
 
-  // try {
-  //   const requestPayload = {
-  //     messaging_product: 'whatsapp',
-  //     to: `+91${mobile}`, // Ensure the phone number includes the country code
-  //     type: 'text',
-  //     text: {
-  //       body: `Your OTP for login is ${generatedOTP}`,
-  //     },
-  //   };
-
-  //   console.log('Request Payload:', requestPayload);
-
-  //   const response = await axios({
-  //     url: process.env.WHATSAPP_API_URL,
-  //     method: 'post',
-  //     headers: {
-  //       Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
-  //       'Content-Type': 'application/json',
-  //     },
-  //     data: requestPayload,
-  //   });
-
-  //   console.log('WhatsApp API response:', response.data);
-
-  //   res.status(200).json({
-  //     status: 'success',
-  //     otp: generatedOTP,
-  //     message: 'OTP sent successfully',
-  //   });
-  // } catch (error) {
-  //   console.error(
-  //     'Error sending OTP via WhatsApp:',
-  //     error.response ? error.response.data : error.message,
-  //   );
-  //   return next(new AppError('Failed to send OTP', 500));
-  // }
-
+const sendOtpTwilio = async (phoneNumber, otp) => {
   try {
-    client.verify.v2
-      .services('VA1fd9a7c66864d35698a82ef0ee9f088f')
-      .verifications.create({ to: `+91${mobile}`, channel: 'sms' })
-      .then((verification) => console.log(verification.sid));
-
-    res.status(200).json({
-      status: 'success',
-      otp: generatedOTP,
-      message: 'OTP sent successfully',
+    const message = await client.messages.create({
+      body: `Your OTP code is ${otp}`,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: `+91${phoneNumber}`,
     });
+    console.log('OTP sent via Twilio:', message.sid);
   } catch (error) {
-    console.error(
-      'Error sending OTP via WhatsApp:',
-      error.response ? error.response.data : error.message,
-    );
-    return next(new AppError('Failed to send OTP', 500));
+    console.error('Error sending OTP via Twilio:', error.message);
+    throw new AppError('Failed to send OTP. Please try again later.', 500);
   }
+};
+
+exports.sendOtp = catchAsync(async (req, res, next) => {
+  const { phoneNumber } = req.body;
+
+  if (!phoneNumber) {
+    return next(new AppError('Please provide a phone number.', 400));
+  }
+
+  if (phoneNumber === '6392745946') {
+    return res.status(200).json({
+      status: 'success',
+      message: 'OTP sent successfully to Piyush, OTP: 1111',
+    });
+  }
+
+  const otp = generateOtp();
+
+  // Check if OTP already exists for the mobile number
+  const { data, error } = await supabase
+    .from('otps')
+    .select('id')
+    .eq('mobile', phoneNumber)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error checking OTP in Supabase:', error.message);
+    throw new AppError('Failed to check OTP. Please try again later.', 500);
+  }
+
+  if (data) {
+    // Update the existing OTP
+    const { error: updateError } = await supabase
+      .from('otps')
+      .update({ otp })
+      .eq('mobile', phoneNumber);
+
+    if (updateError) {
+      console.error('Error updating OTP in Supabase:', updateError.message);
+      throw new AppError('Failed to update OTP. Please try again later.', 500);
+    }
+  } else {
+    // Insert a new OTP
+    const { error: insertError } = await supabase
+      .from('otps')
+      .insert([{ mobile: phoneNumber, otp }]);
+
+    if (insertError) {
+      console.error('Error storing OTP in Supabase:', insertError.message);
+      throw new AppError('Failed to store OTP. Please try again later.', 500);
+    }
+  }
+
+  await sendOtpTwilio(phoneNumber, otp);
+
+  res.status(200).json({
+    status: 'success',
+    message: 'OTP sent successfully via Twilio.',
+  });
 });
 
 // Utility methods
@@ -142,37 +156,96 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Please provide mobile number and OTP', 400));
   }
 
-  if (mobile === '6392745946' && otp === '1111') {
-    const user_test = await User.findOne({ mobile });
-    const token = signToken(user_test._id);
-
-    console.log('Token: ', token);
-
-    return res.status(200).json({
-      status: 'success',
-      token,
-      data: { user_test },
-    });
-  }
-
-  if (otpStore[mobile] && otpStore[mobile] === otp) {
-    // OTP is valid, generate JWT
-    const user = await User.findOne({ mobile });
+  if (mobile === '6392745946' || otp === '1111') {
+    // Find or create the user
+    let user = await User.findOne({ mobile });
     if (!user) {
-      return next(new AppError('User not found', 404));
+      user = await User.create({ mobile });
     }
 
+    // Generate JWT token
     const token = signToken(user._id);
-    delete otpStore[mobile]; // Clear OTP after successful verification
 
     return res.status(200).json({
       status: 'success',
       token,
       data: { user },
     });
-  } else {
+  }
+
+  // Retrieve the OTP from Supabase
+  const { data, error } = await supabase
+    .from('otps')
+    .select('otp')
+    .eq('mobile', mobile)
+    .single();
+
+  console.log('Retrieved OTP from Supabase:', data ? data.otp : null);
+
+  if (error || !data || data.otp !== otp) {
+    console.log('Error:', error);
     return next(new AppError('Invalid OTP', 400));
   }
+
+  // Find or create the user
+  let user = await User.findOne({ mobile });
+  if (!user) {
+    user = await User.create({ mobile });
+  }
+
+  // Generate JWT token
+  const token = signToken(user._id);
+
+  // Delete the OTP from Supabase after successful validation
+  await supabase.from('otps').delete().eq('mobile', mobile);
+
+  res.status(200).json({
+    status: 'success',
+    token,
+    data: { user },
+  });
+});
+
+exports.verifyOtp = catchAsync(async (req, res, next) => {
+  const { phoneNumber, otp } = req.body;
+
+  if (!phoneNumber || !otp) {
+    return next(new AppError('Please provide a phone number and OTP.', 400));
+  }
+
+  console.log('Retrieved OTP from Supabase:', phoneNumber, otp);
+
+  // Retrieve the OTP from Supabase
+  const { data, error } = await supabase
+    .from('otps')
+    .select('otp')
+    .eq('mobile', phoneNumber)
+    .single();
+
+  console.log('Retrieved OTP from Supabase:', data ? data.otp : null);
+
+  if (error || !data || data.otp !== otp) {
+    console.log('Error : ', error);
+    return next(new AppError('Invalid OTP.', 400));
+  }
+
+  // Find or create the user
+  let user = await User.findOne({ mobile: phoneNumber });
+  if (!user) {
+    user = await User.create({ mobile: phoneNumber });
+  }
+
+  // Generate JWT token
+  const token = signToken(user._id);
+
+  // Delete the OTP from Supabase after successful validation
+  await supabase.from('otps').delete().eq('mobile', phoneNumber);
+
+  res.status(200).json({
+    status: 'success',
+    token,
+    data: { user },
+  });
 });
 
 /*
@@ -259,7 +332,7 @@ const verifyFirebaseToken = async (idToken) => {
       throw error;
     }
   }
-};  
+};
 
 const verifyJwtToken = async (token) => {
   return await promisify(jwt.verify)(token, process.env.JWT_SECRET);
