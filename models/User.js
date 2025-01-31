@@ -32,6 +32,13 @@ const userSchema = new mongoose.Schema({
       default: [],
     },
   ],
+  coupons: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Coupon',
+      default: [],
+    },
+  ],
   orders: [
     {
       type: mongoose.Schema.Types.ObjectId,
