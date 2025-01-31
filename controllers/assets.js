@@ -14,9 +14,9 @@ const s3 = new AWS.S3({
 // Set up Multer for file uploads
 const storage = multer.memoryStorage();
 const upload = multer({
-    storage,
-    limits: { fileSize: 15 * 1024 * 1024 }, // 10 MB file size limit
-  }).single('image');
+  storage,
+  limits: { fileSize: 15 * 1024 * 1024 }, // 10 MB file size limit
+}).single('image');
 
 exports.uploadImage = catchAsync(async (req, res, next) => {
   upload(req, res, async (err) => {
@@ -51,6 +51,7 @@ exports.uploadImage = catchAsync(async (req, res, next) => {
       res.status(200).json({
         status: 'success',
         imageUrl: data.Location,
+        key: data.Key,
         uploadUrl,
       });
     } catch (err) {
@@ -82,5 +83,30 @@ exports.getImages = catchAsync(async (req, res, next) => {
   } catch (err) {
     console.error('S3 listObjectsV2 error:', err);
     return next(new AppError('Error retrieving images from S3', 500));
+  }
+});
+
+exports.getPresignedUrl = catchAsync(async (req, res, next) => {
+  const { key } = req.query;
+
+  if (!key) {
+    return next(new AppError('No key provided', 400));
+  }
+
+  try {
+    const signedUrlParams = {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: key,
+      Expires: 60 * 5, // URL expires in 5 minutes
+    };
+    const presignedUrl = s3.getSignedUrl('getObject', signedUrlParams);
+
+    res.status(200).json({
+      status: 'success',
+      presignedUrl,
+    });
+  } catch (err) {
+    console.error('S3 getSignedUrl error:', err);
+    return next(new AppError('Error generating pre-signed URL', 500));
   }
 });
