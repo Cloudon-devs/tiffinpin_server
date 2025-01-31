@@ -9,6 +9,7 @@ const usersRouter = require('./routes/user');
 const dishRouter = require('./routes/dish');
 const mealRouter = require('./routes/meal');
 const orderRouter = require('./routes/order');
+const assetRouter = require('./routes/assets');
 const addressRouter = require('./routes/address');
 const transactionRouter = require('./routes/transaction');
 
@@ -34,10 +35,11 @@ app.use('/api/v1/meal', mealRouter);
 app.use('/api/v1/address', addressRouter);
 app.use('/api/v1/transaction', transactionRouter);
 app.use('/api/v1/order', orderRouter);
+app.use('/api/v1/assets', assetRouter);
 
 // Undefined api access
 app.all('*', (req, res, next) => {
-  next(new AppError(`Caan't find ${req.originalUrl} on this server!`, 404));
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
 // Middleware call for global error handler

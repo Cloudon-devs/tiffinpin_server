@@ -1,0 +1,51 @@
+exports.uploadImage = catchAsync(async (req, res, next) => {
+  console.log('req.file', req);
+
+  upload(req, res, async (err) => {
+    if (err) {
+      console.error('Multer error:', err);
+      return next(new AppError('Error uploading file', 500));
+    }
+
+    if (!req.files || req.files.length === 0) {
+      return next(new AppError('No files uploaded', 400));
+    }
+
+    try {
+      const uploadPromises = req.files.map(async (file) => {
+        const params = {
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Key: `uploads/${Date.now()}-${file.originalname}`,
+          Body: file.buffer,
+          ContentType: file.mimetype,
+        };
+
+        // Upload the file to S3
+        const data = await s3.upload(params).promise();
+
+        // Generate a pre-signed URL for accessing the uploaded file
+        const signedUrlParams = {
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Key: data.Key,
+          Expires: 60 * 10000, // URL expires in 5 minutes
+        };
+        const uploadUrl = s3.getSignedUrl('getObject', signedUrlParams);
+
+        return {
+          imageUrl: data.Location,
+          uploadUrl,
+        };
+      });
+
+      const uploadResults = await Promise.all(uploadPromises);
+
+      res.status(200).json({
+        status: 'success',
+        files: uploadResults,
+      });
+    } catch (err) {
+      console.error('S3 upload error:', err);
+      return next(new AppError('Error uploading files to S3', 500));
+    }
+  });
+});

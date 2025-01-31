@@ -23,20 +23,17 @@ const dishSchema = new mongoose.Schema({
     type: [String],
   },
   img_url: {
-    type: String,
+    type: [String], // Change to an array of strings
     required: true,
   },
   cost_price: {
     type: Number,
-    required: true,
   },
   selling_price: {
     type: Number,
-    required: true,
   },
   rating: {
     type: Number,
-    required: true,
   },
   createdAt: {
     type: Date,

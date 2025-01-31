@@ -10,6 +10,9 @@ const mealSchema = new mongoose.Schema({
     type: String, // Breakfast, Lunch, Dinner
     required: true,
   },
+  tag: {
+    type: String, // Best seller
+  },
   dishes: {
     type: [
       {
