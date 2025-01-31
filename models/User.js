@@ -10,17 +10,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     // required: true,
   },
-  email: {
-    type: String,
-    // unique: true,
-    trim: true,
-    validate: {
-      validator: function (v) {
-        return validator.isEmail(v);
-      },
-      message: (props) => `${props.value} is not a valid email!`,
-    },
-  },
+  // email: {
+  //   type: String,
+  //   // unique: true,
+  //   trim: true,
+  //   validate: {
+  //     validator: function (v) {
+  //       return validator.isEmail(v);
+  //     },
+  //     message: (props) => `${props.value} is not a valid email!`,
+  //   },
+  // },
   mobile: {
     type: String,
     // required: true,
