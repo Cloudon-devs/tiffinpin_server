@@ -26,6 +26,8 @@ const upload = multer({
 }).single('image');
 
 exports.uploadImage = catchAsync(async (req, res, next) => {
+  console.log('Req  coming : ', req);
+
   upload(req, res, async (err) => {
     if (err) {
       console.error('Multer error:', err);
