@@ -16,8 +16,6 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage }).single('image');
 
 exports.uploadImage = catchAsync(async (req, res, next) => {
-
-
   upload(req, res, async (err) => {
     if (err) {
       console.error('Multer error:', err);
@@ -43,7 +41,7 @@ exports.uploadImage = catchAsync(async (req, res, next) => {
       const signedUrlParams = {
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: data.Key,
-        Expires: 60 * 1000000, // URL expires in 1000000 minutes
+        Expires: 60 * 5000, // URL expires in 500 minutes
       };
       const uploadUrl = s3.getSignedUrl('getObject', signedUrlParams);
 
