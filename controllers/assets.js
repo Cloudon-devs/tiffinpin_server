@@ -13,7 +13,10 @@ const s3 = new AWS.S3({
 
 // Set up Multer for file uploads
 const storage = multer.memoryStorage();
-const upload = multer({ storage }).single('image');
+const upload = multer({
+    storage,
+    limits: { fileSize: 15 * 1024 * 1024 }, // 10 MB file size limit
+  }).single('image');
 
 exports.uploadImage = catchAsync(async (req, res, next) => {
   upload(req, res, async (err) => {
