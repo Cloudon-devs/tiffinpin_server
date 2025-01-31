@@ -2,10 +2,11 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
-  firebaseUid: {
-    type: String,
-    unique: true,
-  },
+  // firebaseUid: {
+  //   type: String,
+  //   unique: true,
+  //   sparse: true,
+  // },
   name: {
     type: String,
     // required: true,
