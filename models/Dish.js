@@ -28,9 +28,14 @@ const dishSchema = new mongoose.Schema({
   },
   cost_price: {
     type: Number,
+    required: true,
   },
   selling_price: {
     type: Number,
+  },
+  description: {
+    type: String, 
+    required: true,
   },
   rating: {
     type: Number,

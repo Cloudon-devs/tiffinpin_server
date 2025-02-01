@@ -23,7 +23,7 @@ const mealSchema = new mongoose.Schema({
     ],
   },
   description: {
-    type: String, // Roti, Rice, Curry, Dry sabji, etc
+    type: String,
     required: true,
   },
   cost_price: {
@@ -41,6 +41,14 @@ const mealSchema = new mongoose.Schema({
   discount_percentage: {
     type: Number,
     // required: true,
+  },
+  is_active: {
+    type: Boolean,
+    default: false,
+  },
+  tag: {
+    type: String,
+    default: ""
   },
   img_url: {
     type: [String],
