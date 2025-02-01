@@ -18,13 +18,16 @@ const addressSchema = new mongoose.Schema({
     type: String,
     default: '201009',
   },
-  building_name: {
+  flat_number: {
     type: String,
   },
   locality: {
     type: String,
   },
-  landmark: {
+  tower_number: {
+    type: String,
+  },
+  society: {
     type: String,
   },
   city: {
