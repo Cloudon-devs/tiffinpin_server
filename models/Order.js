@@ -9,9 +9,34 @@ const orderSchema = new mongoose.Schema({
   },
   meals: [
     {
-      type: Schema.Types.ObjectId,
-      ref: 'Meal',
-      required: true,
+      meal: {
+        type: Schema.Types.ObjectId,
+        ref: 'Meal',
+        required: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        default: 1,
+      },
+    },
+  ],
+  dishes: [
+    {
+      dish: {
+        type: Schema.Types.ObjectId,
+        ref: 'Dish',
+        required: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        default: 1,
+      },
+      sub_category: {
+        type: String,
+        required: true,
+      },
     },
   ],
   transaction: {
@@ -34,13 +59,15 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Preparing", "Out For Delivery", "Delivered", "Cancelled"],
-    reequired: true
+    enum: ['Preparing', 'Out For Delivery', 'Delivered', 'Cancelled'],
+    reequired: true,
+    default: 'Preparing',
   },
   payment_method: {
     type: String,
-    enum: ["COD", "Prepaid"],
-    required: true
+    enum: ['COD', 'Prepaid'],
+    required: true,
+    default: 'COD',
   },
   price: {
     type: Number,

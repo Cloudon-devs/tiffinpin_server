@@ -48,7 +48,7 @@ const mealSchema = new mongoose.Schema({
   },
   tag: {
     type: String,
-    default: ""
+    default: '',
   },
   img_url: {
     type: [String],
@@ -57,6 +57,9 @@ const mealSchema = new mongoose.Schema({
   rating: {
     type: Number,
     required: true,
+  },
+  customisation: {
+    type: [String],
   },
   date: {
     type: Date,

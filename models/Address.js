@@ -10,35 +10,28 @@ const addressSchema = new mongoose.Schema({
   },
   reciever_name: {
     type: String,
-    required: true,
   },
   reciever_mobile: {
     type: String,
-    required: true,
   },
   pincode: {
     type: String,
-    required: true,
+    default: '201009',
   },
   building_name: {
     type: String,
-    required: true,
   },
   locality: {
     type: String,
-    required: true,
   },
   landmark: {
     type: String,
-    required: true,
   },
   city: {
     type: String,
-    required: true,
   },
   state: {
     type: String,
-    required: true,
   },
   alias: {
     type: String,
