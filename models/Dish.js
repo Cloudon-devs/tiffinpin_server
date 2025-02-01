@@ -23,7 +23,7 @@ const dishSchema = new mongoose.Schema({
     type: [String],
   },
   img_url: {
-    type: [String], // Change to an array of strings
+    type: [String],
     required: true,
   },
   cost_price: {

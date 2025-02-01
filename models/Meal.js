@@ -34,12 +34,16 @@ const mealSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  discount_percentage: {
+  discounted_price: {
     type: Number,
     required: true,
   },
+  discount_percentage: {
+    type: Number,
+    // required: true,
+  },
   img_url: {
-    type: String,
+    type: [String],
     required: true,
   },
   rating: {
