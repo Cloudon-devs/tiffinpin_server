@@ -156,11 +156,31 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Please provide mobile number and OTP', 400));
   }
 
-  if (mobile === '6392745946' || otp === '1111') {
+  // Special case for mobile number 6392745946 with OTP 1111
+  if (mobile === '6392745946' && otp === '1111') {
     // Find or create the user
     let user = await User.findOne({ mobile });
     if (!user) {
       user = await User.create({ mobile });
+
+      // Generate a random discount value between 6 and 10
+      const discount = Math.floor(Math.random() * (10 - 6 + 1)) + 6;
+
+      // Create a new coupon for the user
+      const newCoupon = await Coupon.create({
+        name: 'Welcome Coupon',
+        off: discount,
+        category: 'Off',
+        description_text:
+          'Welcome to our service! Enjoy a discount on your first order.',
+        img_url: '/path/to/coupon/image.jpg',
+        isScratched: false,
+        expiryTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+      });
+
+      // Add the coupon to the user's profile
+      user.coupons.push(newCoupon._id);
+      await user.save();
     }
 
     // Generate JWT token
@@ -191,6 +211,25 @@ exports.login = catchAsync(async (req, res, next) => {
   let user = await User.findOne({ mobile });
   if (!user) {
     user = await User.create({ mobile });
+
+    // Generate a random discount value between 6 and 10
+    const discount = Math.floor(Math.random() * (10 - 6 + 1)) + 6;
+
+    // Create a new coupon for the user
+    const newCoupon = await Coupon.create({
+      name: 'Welcome Coupon',
+      off: discount,
+      category: 'Off',
+      description_text:
+        'Welcome to our service! Enjoy a discount on your first order.',
+      img_url: '/path/to/coupon/image.jpg',
+      isScratched: false,
+      expiryTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+    });
+
+    // Add the coupon to the user's profile
+    user.coupons.push(newCoupon._id);
+    await user.save();
   }
 
   // Generate JWT token
