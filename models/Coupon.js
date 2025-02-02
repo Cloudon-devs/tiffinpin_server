@@ -19,9 +19,13 @@ const couponSchema = new mongoose.Schema({
   img_url: {
     type: String,
   },
-  isScratched: {
+  is_scratched: {
     type: Boolean,
-    required: true,
+    required: false,
+  },
+  is_used: {
+    type: Boolean,
+    required: false,
   },
   expiryTime: {
     type: Date,
