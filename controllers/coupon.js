@@ -14,7 +14,8 @@ exports.createCoupon = catchAsync(async (req, res) => {
 
 // Get all coupons
 exports.getAllCoupons = catchAsync(async (req, res) => {
-  const coupons = await Coupon.find();
+  const userId = req.user.id;
+  const coupons = await Coupon.find({ user: userId });
   res.status(200).json({
     status: 'success',
     results: coupons.length,

@@ -1,12 +1,12 @@
 const express = require('express');
-const couponController = require('../controllers/coupon'); 
+const couponController = require('../controllers/coupon');
 
 const router = express.Router();
 
 // Routes
 router
   .route('/')
-  .get(couponController.getAllCoupons)
+  .get(authController.protect, couponController.getAllCoupons)
   .post(couponController.createCoupon);
 
 router
