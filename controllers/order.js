@@ -133,7 +133,15 @@ exports.createCodOrder = catchAsync(async (req, res, next) => {
 exports.getUserOrders = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
 
-  const orders = await Order.find({ user: userId }).populate('meals');
+  const orders = await Order.find({ user: userId })
+    .populate({
+      path: 'meals.meal',
+      model: 'Meal',
+    })
+    .populate({
+      path: 'dishes.dish',
+      model: 'Dish',
+    });
 
   res.status(200).json({
     status: 'success',
