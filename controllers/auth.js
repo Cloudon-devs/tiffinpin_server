@@ -168,8 +168,6 @@ exports.login = catchAsync(async (req, res, next) => {
       // Generate a random discount value between 6 and 10
       const discount = Math.floor(Math.random() * (10 - 6 + 1)) + 6;
 
-      console.log('Dicoiunt: ', discount);
-
       // Create a new coupon for the user
       const newCoupon = await Coupon.create({
         name: 'Welcome Coupon',
@@ -180,6 +178,7 @@ exports.login = catchAsync(async (req, res, next) => {
         img_url: '/path/to/coupon/image.jpg',
         isScratched: false,
         expiryTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+        user: user._id,
       });
 
       console.log('coupon created: ', newCoupon);
@@ -230,7 +229,8 @@ exports.login = catchAsync(async (req, res, next) => {
         'Welcome to our service! Enjoy a discount on your first order.',
       img_url: '/path/to/coupon/image.jpg',
       isScratched: false,
-      expiryTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+      expiryTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+      user: user._id,
     });
 
     // Add the coupon to the user's profile
