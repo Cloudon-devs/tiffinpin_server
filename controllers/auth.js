@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const User = require('../models/User');
+const Coupon = require('../models/Coupon');
+
 const { type } = require('os');
 const { response } = require('express');
 const { OAuth2Client } = require('google-auth-library');
@@ -166,6 +168,8 @@ exports.login = catchAsync(async (req, res, next) => {
       // Generate a random discount value between 6 and 10
       const discount = Math.floor(Math.random() * (10 - 6 + 1)) + 6;
 
+      console.log('Dicoiunt: ', discount);
+
       // Create a new coupon for the user
       const newCoupon = await Coupon.create({
         name: 'Welcome Coupon',
@@ -177,6 +181,8 @@ exports.login = catchAsync(async (req, res, next) => {
         isScratched: false,
         expiryTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
       });
+
+      console.log('coupon created: ', newCoupon);
 
       // Add the coupon to the user's profile
       user.coupons.push(newCoupon._id);

@@ -16,7 +16,7 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets['EC2_Tiffinpin_devs'] }}
+          ssh-private-key: ${{ secrets['Tiffinpin backend CI/CD'] }}
 
       - name: Copy files to EC2
         run: |
