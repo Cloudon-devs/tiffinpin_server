@@ -34,7 +34,7 @@ const mealSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  discounted_price: {
+  actual_price: {
     type: Number,
     required: true,
   },
