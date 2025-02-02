@@ -3,6 +3,8 @@ const Order = require('../models/Order');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
+const mongoose = require('mongoose');
+
 // Initialize Razorpay instance
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -67,19 +69,50 @@ exports.verifyPayment = catchAsync(async (req, res, next) => {
   Create COD Order
 */
 exports.createCodOrder = catchAsync(async (req, res, next) => {
-  const { meals, dishes, price, amount, currency, receipt, status } = req.body;
+  const { meals, dishes, address, price, amount, currency, receipt, status } =
+    req.body;
+
+  console.log(address);
+
+  // Extract the address ID if the address is an object
+  const addressId = address._id ? address._id : address;
+
+  // Validate address
+  if (!mongoose.Types.ObjectId.isValid(addressId)) {
+    return next(new AppError('Invalid address ID', 400));
+  }
+
+  // Validate and convert meal IDs
+  const validMeals = meals.map((meal) => {
+    if (!mongoose.Types.ObjectId.isValid(meal.meal_id)) {
+      throw new AppError(`Invalid meal ID: ${meal.meal_id}`, 400);
+    }
+    return {
+      meal: new mongoose.Types.ObjectId(meal.meal_id),
+      quantity: meal.quantity,
+    };
+  });
+
+  // Validate and convert dish IDs
+  const validDishes = dishes.map((dish) => {
+    if (!mongoose.Types.ObjectId.isValid(dish.dish_id)) {
+      throw new AppError(`Invalid dish ID: ${dish.dish_id}`, 400);
+    }
+    return {
+      dish: new mongoose.Types.ObjectId(dish.dish_id),
+      quantity: dish.quantity,
+      sub_category: dish.sub_category,
+    };
+  });
+
+  console.log(validMeals, validDishes);
 
   // Create a new order in your database
   const newOrder = await Order.create({
     user: req.user.id,
-    meals: meals.map((meal) => ({
-      meal: meal.meal_id,
-      quantity: meal.quantity,
-    })),
-    dishes: dishes.map((dish) => ({
-      dish: dish.dish_id,
-      quantity: dish.quantity,
-    })),
+    address: addressId,
+    meals: validMeals,
+    dishes: validDishes,
     price,
     amount,
     currency,
