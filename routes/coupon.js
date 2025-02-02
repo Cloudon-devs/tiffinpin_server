@@ -1,5 +1,6 @@
 const express = require('express');
 const couponController = require('../controllers/coupon');
+const authController = require('../controllers/auth');
 
 const router = express.Router();
 
