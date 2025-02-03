@@ -42,7 +42,7 @@ exports.getUser = catchAsync(async (req, res) => {
 exports.getUserProfile = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
 
-  const user = await User.findById(userId).select('-password'); // Exclude password field
+  const user = await User.findById(userId).select('-password').populate("coupons"); // Exclude password field
   if (!user) {
     return next(new AppError('User not found', 404));
   }
