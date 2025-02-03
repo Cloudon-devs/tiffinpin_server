@@ -39,6 +39,22 @@ exports.getUser = catchAsync(async (req, res) => {
   });
 });
 
+exports.getUserProfile = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+
+  const user = await User.findById(userId).select('-password'); // Exclude password field
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user,
+    },
+  });
+});
+
 exports.createUser = catchAsync(async (req, res) => {
   const hashedPassword = await bcrypt.hash(req.body.password, 12);
 
