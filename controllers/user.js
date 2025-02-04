@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const catchAsync = require('../utils/catchAsync');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 // Route handlers
 exports.getAllUsers = catchAsync(async (req, res) => {
@@ -22,7 +23,7 @@ exports.getUser = catchAsync(async (req, res) => {
   const userId = decoded.id;
 
   // Find the user by ID
-  const user = await User.findById(userId);
+  const user = await User.findById(userId).populate('coupons');
 
   if (!user) {
     return res.status(404).json({
@@ -42,7 +43,9 @@ exports.getUser = catchAsync(async (req, res) => {
 exports.getUserProfile = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
 
-  const user = await User.findById(userId).select('-password').populate("coupons"); // Exclude password field
+  const user = await User.findById(userId)
+    .select('-password')
+    .populate('coupons'); // Exclude password field
   if (!user) {
     return next(new AppError('User not found', 404));
   }

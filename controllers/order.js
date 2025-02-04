@@ -72,8 +72,6 @@ exports.createCodOrder = catchAsync(async (req, res, next) => {
   const { meals, dishes, address, price, amount, currency, receipt, status } =
     req.body;
 
-  console.log(address);
-
   // Extract the address ID if the address is an object
   const addressId = address._id ? address._id : address;
 
