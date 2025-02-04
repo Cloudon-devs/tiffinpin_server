@@ -4,6 +4,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
 const mongoose = require('mongoose');
+const Coupon = require('../models/Coupon');
 
 // Initialize Razorpay instance
 const razorpay = new Razorpay({
@@ -69,8 +70,20 @@ exports.verifyPayment = catchAsync(async (req, res, next) => {
   Create COD Order
 */
 exports.createCodOrder = catchAsync(async (req, res, next) => {
-  const { meals, dishes, address, price, amount, currency, receipt, status } =
-    req.body;
+  const {
+    meals,
+    dishes,
+    address,
+    price,
+    amount,
+    currency,
+    receipt,
+    status,
+    couponId,
+  } = req.body;
+
+  // Log the entire request body for debugging
+  console.log('Request body: ', req.body);
 
   // Extract the address ID if the address is an object
   const addressId = address._id ? address._id : address;
@@ -103,7 +116,10 @@ exports.createCodOrder = catchAsync(async (req, res, next) => {
     };
   });
 
-  console.log(validMeals, validDishes);
+  // Validate and convert coupon ID
+  if (couponId && !mongoose.Types.ObjectId.isValid(couponId)) {
+    return next(new AppError('Invalid coupon ID', 400));
+  }
 
   // Create a new order in your database
   const newOrder = await Order.create({
@@ -118,7 +134,14 @@ exports.createCodOrder = catchAsync(async (req, res, next) => {
     status,
     payment_method: 'COD',
     time: new Date().toTimeString().split(' ')[0],
+    coupon: couponId, // Add coupon ID to the order
   });
+
+  // Update the coupon to mark it as used
+  if (couponId) {
+    console.log('Coupon ID: ', couponId);
+    await Coupon.findByIdAndUpdate(couponId, { is_used: true });
+  }
 
   res.status(201).json({
     status: 'success',

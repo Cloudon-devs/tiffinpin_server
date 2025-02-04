@@ -74,6 +74,10 @@ const orderSchema = new mongoose.Schema({
     required: true,
     default: 'COD',
   },
+  coupon: {
+    type: Schema.Types.ObjectId,
+    ref: 'Coupon',
+  },
   price: {
     type: Number,
   },
