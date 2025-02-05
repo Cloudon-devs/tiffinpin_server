@@ -18,6 +18,8 @@ router
 
 router.get('/user-orders', authController.protect, orderController.getUserOrders);
 
+router.get('/', authController.protect, orderController.getAllOrders);
+
 router
   .route('/:id')
   .get(orderController.getOrder)
