@@ -170,7 +170,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
       // Create a new coupon for the user
       const newCoupon = await Coupon.create({
-        name: 'Welcome Coupon',
+        name: 'Welcome',
         off: discount,
         category: 'Off',
         description_text:

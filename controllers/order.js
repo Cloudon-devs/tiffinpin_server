@@ -184,7 +184,8 @@ exports.getAllOrders = catchAsync(async (req, res) => {
       path: 'dishes.dish',
       model: 'Dish',
     })
-    .populate('address');
+    .populate('address')
+    .populate('user');
 
   res.status(200).json({
     status: 'success',
