@@ -230,13 +230,25 @@ exports.updateOrder = catchAsync(async (req, res) => {
   const order = await Order.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
-  }).populate('user meal transaction');
+  })
+    .populate('user')
+    .populate({
+      path: 'meals.meal',
+      model: 'Meal',
+    })
+    .populate({
+      path: 'dishes.dish',
+      model: 'Dish',
+    })
+    .populate('transaction');
+
   if (!order) {
     return res.status(404).json({
       status: 'fail',
       message: 'No order found with that ID',
     });
   }
+
   res.status(200).json({
     status: 'success',
     data: {
