@@ -175,7 +175,16 @@ exports.getUserOrders = catchAsync(async (req, res, next) => {
 
 // Get all orders
 exports.getAllOrders = catchAsync(async (req, res) => {
-  const orders = await Order.find().populate('meals');
+  const orders = await Order.find()
+    .populate({
+      path: 'meals.meal',
+      model: 'Meal',
+    })
+    .populate({
+      path: 'dishes.dish',
+      model: 'Dish',
+    });
+
   res.status(200).json({
     status: 'success',
     results: orders.length,
