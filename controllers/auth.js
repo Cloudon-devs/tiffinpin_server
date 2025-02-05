@@ -176,12 +176,11 @@ exports.login = catchAsync(async (req, res, next) => {
         description_text:
           'Welcome to our service! Enjoy a discount on your first order.',
         img_url: '/path/to/coupon/image.jpg',
-        isScratched: false,
+        is_scratched: false,
+        is_used: false,
         expiryTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
         user: user._id,
       });
-
-      console.log('coupon created: ', newCoupon);
 
       // Add the coupon to the user's profile
       user.coupons.push(newCoupon._id);
