@@ -81,6 +81,9 @@ const orderSchema = new mongoose.Schema({
   price: {
     type: Number,
   },
+  amount: {
+    type: Number,
+  },
   timstamp: {
     type: Date,
     default: Date.now,
