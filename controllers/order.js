@@ -2,8 +2,8 @@ const Razorpay = require('razorpay');
 const Order = require('../models/Order');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-
 const mongoose = require('mongoose');
+const User = require('../models/User');
 const Coupon = require('../models/Coupon');
 
 // Initialize Razorpay instance
