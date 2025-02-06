@@ -143,10 +143,30 @@ exports.createCodOrder = catchAsync(async (req, res, next) => {
     await Coupon.findByIdAndUpdate(couponId, { is_used: true });
   }
 
+  const discount = Math.floor(Math.random() * (11 - 5 + 1)) + 5;
+
+  const newCoupon = await Coupon.create({
+    name: 'Recurring',
+    off: discount,
+    category: 'Off',
+    description_text:
+      'Thank you for your order! Enjoy a discount on your next purchase.',
+    img_url: '/path/to/coupon/image.jpg',
+    isScratched: false,
+    is_used: false,
+    expiryTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+    user: req.user.id,
+  });
+
+  await User.findByIdAndUpdate(req.user.id, {
+    $push: { coupons: newCoupon._id },
+  });
+
   res.status(201).json({
     status: 'success',
     data: {
       order: newOrder,
+      new_coupon: newCoupon,
     },
   });
 });
