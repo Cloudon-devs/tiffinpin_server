@@ -13,6 +13,14 @@ const dishSchema = new mongoose.Schema({
     type: String, // Roti, Rice, Curry, Dry sabji, etc
     required: true,
   },
+  is_active: {
+    type: Boolean,
+    default: false,
+  },
+  tag: {
+    type: String,
+    default: '',
+  },
   ingrident: {
     type: [String],
   },
@@ -34,7 +42,7 @@ const dishSchema = new mongoose.Schema({
     required: true,
   },
   description: {
-    type: String, 
+    type: String,
     required: true,
   },
   rating: {
