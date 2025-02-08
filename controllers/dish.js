@@ -16,6 +16,13 @@ exports.createDish = catchAsync(async (req, res) => {
 // Get all dishes
 exports.getAllDishes = catchAsync(async (req, res) => {
   const dishes = await Dish.find();
+
+  dishes.forEach((dish) => {
+    if (dish.img_url) {
+      dish.img_url = dish.img_url.map((key) => getPresignedUrl(key));
+    }
+  });
+
   res.status(200).json({
     status: 'success',
     results: dishes.length,
