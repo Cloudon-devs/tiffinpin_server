@@ -98,7 +98,8 @@ exports.getImages = catchAsync(async (req, res, next) => {
 });
 
 exports.getPresignedUrl = catchAsync(async (req, res, next) => {
-  const { key } = req.query;
+  console.log('hiii: ', req);
+  const { key } = req;
 
   if (!key) {
     return next(new AppError('No key provided', 400));

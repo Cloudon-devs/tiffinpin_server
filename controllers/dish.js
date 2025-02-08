@@ -1,5 +1,6 @@
 const Dish = require('../models/Dish');
 const catchAsync = require('../utils/catchAsync');
+const { generatePresignedUrl } = require('../utils/s3');
 const { getPresignedUrl } = require('./assets');
 
 // Create a new dish
@@ -14,12 +15,15 @@ exports.createDish = catchAsync(async (req, res) => {
 });
 
 // Get all dishes
-exports.getAllDishes = catchAsync(async (req, res) => {
+exports.getAllDishes = catchAsync(async (req, res, next) => {
   const dishes = await Dish.find();
 
+  // Generate new pre-signed URLs for the images
   dishes.forEach((dish) => {
     if (dish.img_url) {
-      dish.img_url = dish.img_url.map((key) => getPresignedUrl(key));
+      dish.img_url = dish.img_url.map(() =>
+        generatePresignedUrl(dish?.asset_aws_key),
+      );
     }
   });
 

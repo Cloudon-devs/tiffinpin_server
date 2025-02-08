@@ -34,6 +34,9 @@ const dishSchema = new mongoose.Schema({
     type: [String],
     required: true,
   },
+  asset_aws_key: {
+    type: [String],
+  },
   cost_price: {
     type: Number,
   },
