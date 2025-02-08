@@ -1,5 +1,6 @@
 const Dish = require('../models/Dish');
 const catchAsync = require('../utils/catchAsync');
+const { getPresignedUrl } = require('./assets');
 
 // Create a new dish
 exports.createDish = catchAsync(async (req, res) => {
@@ -33,6 +34,11 @@ exports.getDish = catchAsync(async (req, res) => {
       message: 'No dish found with that ID',
     });
   }
+
+  if (dish.img_url) {
+    dish.img_url = dish.img_url.map((key) => getPresignedUrl(key));
+  }
+
   res.status(200).json({
     status: 'success',
     data: {
@@ -42,17 +48,16 @@ exports.getDish = catchAsync(async (req, res) => {
 });
 
 // Update a dish by ID
-exports.updateDish = catchAsync(async (req, res) => {
+exports.updateDish = catchAsync(async (req, res, next) => {
   const dish = await Dish.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });
+
   if (!dish) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'No dish found with that ID',
-    });
+    return next(new AppError('No dish found with that ID', 404));
   }
+
   res.status(200).json({
     status: 'success',
     data: {

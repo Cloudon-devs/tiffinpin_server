@@ -108,7 +108,7 @@ exports.getPresignedUrl = catchAsync(async (req, res, next) => {
     const signedUrlParams = {
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: key,
-      Expires: 60 * 5, // URL expires in 5 minutes
+      Expires: 60 * 10000, // URL expires in 1000 minutes
     };
     const presignedUrl = s3.getSignedUrl('getObject', signedUrlParams);
 
