@@ -55,7 +55,7 @@ exports.uploadImage = catchAsync(async (req, res, next) => {
       const signedUrlParams = {
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: data.Key,
-        Expires: 30, // URL expires in 500 minutes
+        Expires: 60 * 500, // URL expires in 500 minutes
       };
       const uploadUrl = s3.getSignedUrl('getObject', signedUrlParams);
 
