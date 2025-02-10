@@ -14,7 +14,7 @@ exports.createMeal = catchAsync(async (req, res) => {
 
 // Get all meals
 exports.getAllMeals = catchAsync(async (req, res) => {
-  const meals = await Meal.find().populate('dishes');
+  const meals = await Meal.find().populate('dishes').sort({ is_active: -1 });
   res.status(200).json({
     status: 'success',
     results: meals.length,
