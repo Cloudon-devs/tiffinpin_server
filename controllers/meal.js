@@ -15,7 +15,7 @@ exports.createMeal = catchAsync(async (req, res) => {
 // Get all meals
 exports.getAllMeals = catchAsync(async (req, res) => {
   const meals = await Meal.find().populate('dishes').sort({ is_active: -1 });
-
+  
   // Generate new pre-signed URLs for the images
   meals.forEach((meal) => {
     if (meal.asset_aws_key && meal.asset_aws_key.length > 0) {
