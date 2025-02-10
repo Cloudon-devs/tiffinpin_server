@@ -54,6 +54,9 @@ const mealSchema = new mongoose.Schema({
     type: [String],
     required: true,
   },
+  asset_aws_key: {
+    type: [String],
+  },
   rating: {
     type: Number,
     required: true,
