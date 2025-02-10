@@ -206,7 +206,7 @@ exports.getAllOrders = catchAsync(async (req, res) => {
     })
     .populate('address')
     .populate('user')
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: 1 });
 
   res.status(200).json({
     status: 'success',
