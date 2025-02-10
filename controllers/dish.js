@@ -20,10 +20,8 @@ exports.getAllDishes = catchAsync(async (req, res, next) => {
 
   // Generate new pre-signed URLs for the images
   dishes.forEach((dish) => {
-    if (dish.img_url) {
-      dish.img_url = dish.img_url.map(() =>
-        generatePresignedUrl(dish?.asset_aws_key),
-      );
+    if (dish.asset_aws_key && dish.asset_aws_key.length > 0) {
+      dish.img_url = dish.asset_aws_key.map((key) => generatePresignedUrl(key));
     }
   });
 

@@ -98,7 +98,6 @@ exports.getImages = catchAsync(async (req, res, next) => {
 });
 
 exports.getPresignedUrl = catchAsync(async (req, res, next) => {
-  console.log('hiii: ', req);
   const { key } = req;
 
   if (!key) {
