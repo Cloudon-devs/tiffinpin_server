@@ -1,5 +1,7 @@
 const Meal = require('../models/Meal');
 const catchAsync = require('../utils/catchAsync');
+const { generatePresignedUrl } = require('../utils/s3');
+const { getPresignedUrl } = require('./assets');
 
 // Create a new meal
 exports.createMeal = catchAsync(async (req, res) => {
@@ -15,9 +17,13 @@ exports.createMeal = catchAsync(async (req, res) => {
 // Get all meals
 exports.getAllMeals = catchAsync(async (req, res) => {
   const meals = await Meal.find().populate('dishes').sort({ is_active: -1 });
-  
+
+  console.log('Meals');
+
   // Generate new pre-signed URLs for the images
   meals.forEach((meal) => {
+    console.log('Meals testing: ', meal?.asset_aws_key);
+
     if (meal.asset_aws_key && meal.asset_aws_key.length > 0) {
       meal.img_url = meal.asset_aws_key.map((key) => generatePresignedUrl(key));
     }

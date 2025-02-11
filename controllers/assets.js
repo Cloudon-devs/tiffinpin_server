@@ -62,7 +62,7 @@ exports.uploadImage = catchAsync(async (req, res, next) => {
       res.status(200).json({
         status: 'success',
         imageUrl: data.Location,
-        key: data.Key,
+        aws_asset_key: data.Key,
         uploadUrl,
       });
     } catch (err) {
