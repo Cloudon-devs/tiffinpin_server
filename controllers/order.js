@@ -182,7 +182,8 @@ exports.getUserOrders = catchAsync(async (req, res, next) => {
     .populate({
       path: 'dishes.dish',
       model: 'Dish',
-    });
+    })
+    .sort({ is_active: -1 });
 
   res.status(200).json({
     status: 'success',
@@ -238,7 +239,7 @@ exports.getOrder = catchAsync(async (req, res) => {
 
 exports.getAllOrdersByUserId = catchAsync(async (req, res) => {
   const userId = req.user.id;
-  const orders = await Order.find({ user_id: userId });
+  const orders = await Order.find({ user_id: userId }).sort('');
   res.status(200).json({
     status: 'success',
     results: orders.length,
