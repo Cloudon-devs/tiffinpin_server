@@ -2,8 +2,6 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 
 const generatePresignedUrl = (key, expiresIn = 60 * 5) => {
-  console.log("Hii")
-
   const signedUrlParams = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: key,
