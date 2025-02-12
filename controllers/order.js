@@ -183,7 +183,7 @@ exports.getUserOrders = catchAsync(async (req, res, next) => {
       path: 'dishes.dish',
       model: 'Dish',
     })
-    .sort({ is_active: -1 });
+    .sort({ createdAt: -1 });
 
   res.status(200).json({
     status: 'success',
