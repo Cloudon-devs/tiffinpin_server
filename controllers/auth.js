@@ -15,7 +15,6 @@ const { OAuth2Client } = require('google-auth-library');
 const client_google = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const { createClient } = require('@supabase/supabase-js');
 
-const admin = require('firebase-admin');
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_KEY,
@@ -25,12 +24,6 @@ AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   region: 'ap-south-1',
-});
-
-admin.initializeApp({
-  credential: admin.credential.cert(
-    require('../credentials/firebase_sdk.json'),
-  ),
 });
 
 const client = twilio(

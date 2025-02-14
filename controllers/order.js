@@ -5,6 +5,13 @@ const AppError = require('../utils/appError');
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const Coupon = require('../models/Coupon');
+const admin = require('firebase-admin');
+const serviceAccount = require('../../credentials/firebase_keys.json');
+
+// Initialize Firebase instance
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+// });
 
 // Initialize Razorpay instance
 const razorpay = new Razorpay({
@@ -161,6 +168,24 @@ exports.createCodOrder = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(req.user.id, {
     $push: { coupons: newCoupon._id },
   });
+  // Send push notification
+  const message = {
+    notification: {
+      title: 'New Order Received',
+      body: 'You have a new order. Please check your dashboard.',
+    },
+    token: 'FCM_TOKEN', // Replace with the actual FCM token
+  };
+
+  admin
+    .messaging()
+    .send(message)
+    .then((response) => {
+      console.log('Successfully sent message:', response);
+    })
+    .catch((error) => {
+      console.log('Error sending message:', error);
+    });
 
   res.status(201).json({
     status: 'success',
