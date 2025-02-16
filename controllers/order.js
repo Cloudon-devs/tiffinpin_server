@@ -270,6 +270,15 @@ exports.getOrder = catchAsync(async (req, res) => {
     });
   }
 
+  // Generate presigned URLs for img_url in meals
+  order.meals.forEach((meal) => {
+    if (meal.meal.asset_aws_key && meal.meal.asset_aws_key.length > 0) {
+      meal.meal.img_url = meal.meal.asset_aws_key.map((key) =>
+        generatePresignedUrl(key),
+      );
+    }
+  });
+
   console.log('Order fetched successfully:', order);
   res.status(200).json({
     status: 'success',
