@@ -245,9 +245,19 @@ exports.getAllOrders = catchAsync(async (req, res) => {
 
 // Get a single order by ID
 exports.getOrder = catchAsync(async (req, res) => {
-  const order = await Order.findById(req.params.id).populate(
-    'user meal transaction',
-  );
+  const order = await Order.findById(req.params.id)
+    .populate({
+      path: 'meals.meal',
+      model: 'Meal',
+    })
+    .populate({
+      path: 'dishes.dish',
+      model: 'Dish',
+    })
+    .populate('address')
+    .populate('user')
+    .populate('coupon')
+    .sort({ createdAt: 1 });
   if (!order) {
     return res.status(404).json({
       status: 'fail',
