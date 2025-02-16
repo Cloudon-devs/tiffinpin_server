@@ -249,10 +249,12 @@ exports.getOrder = catchAsync(async (req, res) => {
     .populate({
       path: 'meals.meal',
       model: 'Meal',
+      options: { strictPopulate: false },
     })
     .populate({
       path: 'dishes.dish',
       model: 'Dish',
+      options: { strictPopulate: false },
     })
     .populate('address')
     .populate('user')
