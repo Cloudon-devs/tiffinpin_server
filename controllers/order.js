@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Coupon = require('../models/Coupon');
 const admin = require('firebase-admin');
+const { generatePresignedUrl } = require('../utils/s3');
 // const serviceAccount = require('../../credentials/firebase_keys.json');
 
 // Initialize Firebase instance
