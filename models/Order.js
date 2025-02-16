@@ -65,7 +65,7 @@ const orderSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['Preparing', 'Out For Delivery', 'Delivered', 'Cancelled'],
-    reequired: true,
+    required: true,
     default: 'Preparing',
   },
   payment_method: {
@@ -84,7 +84,7 @@ const orderSchema = new mongoose.Schema({
   amount: {
     type: Number,
   },
-  timstamp: {
+  timestamp: {
     type: Date,
     default: Date.now,
   },
@@ -93,8 +93,6 @@ const orderSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
-
-// Instance methods
 
 const Order = mongoose.model('Order', orderSchema);
 
