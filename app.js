@@ -14,6 +14,7 @@ const addressRouter = require('./routes/address');
 const couponRouter = require('./routes/coupon');
 const notificationRouter = require('./routes/notification');
 const transactionRouter = require('./routes/transaction');
+const kitchenRoutes = require('./routes/kitchen');
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/api/v1/assets', assetRouter);
 app.use('/api/v1/assets', assetRouter);
 app.use('/api/v1/coupon', couponRouter);
 app.use('/api/v1/notification', notificationRouter);
+app.use('/api/v1/kitchen', kitchenRoutes);
 
 // Undefined api access
 app.all('*', (req, res, next) => {
