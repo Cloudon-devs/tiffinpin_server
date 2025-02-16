@@ -17,6 +17,10 @@ const dishSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  is_show: {
+    type: Boolean,
+    default: false,
+  },
   tag: {
     type: String,
     default: '',
