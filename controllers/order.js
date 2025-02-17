@@ -211,6 +211,33 @@ exports.getUserOrders = catchAsync(async (req, res, next) => {
     })
     .sort({ createdAt: -1 });
 
+  // Generate new pre-signed URLs for the images
+  orders.forEach((order) => {
+    // Handle meals
+    order.meals.forEach((mealOrder) => {
+      if (
+        mealOrder.meal?.asset_aws_key &&
+        mealOrder.meal.asset_aws_key.length > 0
+      ) {
+        mealOrder.meal.img_url = mealOrder.meal.asset_aws_key.map((key) =>
+          generatePresignedUrl(key),
+        );
+      }
+    });
+
+    // Handle dishes
+    order.dishes.forEach((dishOrder) => {
+      if (
+        dishOrder.dish?.asset_aws_key &&
+        dishOrder.dish.asset_aws_key.length > 0
+      ) {
+        dishOrder.dish.img_url = dishOrder.dish.asset_aws_key.map((key) =>
+          generatePresignedUrl(key),
+        );
+      }
+    });
+  });
+
   res.status(200).json({
     status: 'success',
     results: orders.length,
