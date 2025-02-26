@@ -5,7 +5,19 @@ const jwt = require('jsonwebtoken');
 
 // Route handlers
 exports.getAllUsers = catchAsync(async (req, res) => {
-  const users = await User.find();
+  const { startDate, endDate } = req.query;
+
+  // Create filter object
+  let filter = {};
+  if (startDate && endDate) {
+    filter.createdAt = {
+      $gte: new Date(startDate), // Greater than or equal to startDate
+      $lte: new Date(endDate), // Less than or equal to endDate
+    };
+  }
+
+  const users = await User.find(filter);
+
   res.status(200).json({
     status: 'success',
     results: users.length,
