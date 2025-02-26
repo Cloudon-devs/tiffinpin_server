@@ -39,6 +39,11 @@ const couponSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  order: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Order',
+    default: null,
+  },
 });
 
 // Instance methods

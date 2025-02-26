@@ -24,29 +24,40 @@ exports.saveFCMToken = catchAsync(async (req, res) => {
   });
 });
 
-const sendNotification = async (fcmToken, title, body) => {
+exports.sendNotificationByPhone = catchAsync(async (req, res) => {
+  const { phoneNumber, title, body } = req.body;
+
+  const user = await User.findOne({ mobile: phoneNumber });
+  if (!user || !user.fcmToken) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'User not found or FCM token not available',
+    }); 
+  }
+
   const message = {
     notification: {
       title,
       body,
     },
-    token: fcmToken,
+    token: user.fcmToken,
   };
 
   try {
     const response = await admin.messaging().send(message);
-    console.log('Successfully sent message:', response);
+    console.log("Notification sent successfully:", response);
+    res.status(200).json({
+      status: 'success',
+      data: { messageId: response },
+    });
   } catch (error) {
-    console.error('Error sending message:', error);
-    if (error.code === 'messaging/invalid-recipient') {
-      console.error('Invalid FCM token:', fcmToken);
-    } else if (error.code === 'messaging/registration-token-not-registered') {
-      console.error('FCM token not registered:', fcmToken);
-    } else {
-      console.error('Unexpected error:', error);
-    }
+    console.error('Error sending notification:', error);
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+    });
   }
-};
+});
 
 exports.sendNotifications = catchAsync(async (req, res) => {
   const { userId, title, body } = req.body;

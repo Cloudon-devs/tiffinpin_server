@@ -10,4 +10,6 @@ router
   .route('/')
   .post(authController.protect, notificationController.sendNotifications);
 
+router.route('/send-aws-noti').post(authController.protect, notificationController.sendNotificationByPhone);
+
 module.exports = router;

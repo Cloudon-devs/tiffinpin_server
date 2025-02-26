@@ -11,7 +11,6 @@ exports.closeKitchen = catchAsync(async (req, res) => {
     {},
     {
       is_active: false,
-      is_show: false,
     },
   );
 
@@ -20,7 +19,6 @@ exports.closeKitchen = catchAsync(async (req, res) => {
     {},
     {
       is_active: false,
-      is_show: false,
     },
   );
 
