@@ -249,7 +249,18 @@ exports.getUserOrders = catchAsync(async (req, res, next) => {
 
 // Get all orders
 exports.getAllOrders = catchAsync(async (req, res) => {
-  const orders = await Order.find()
+  const { startDate, endDate } = req.query;
+
+  // Create filter object
+  let filter = {};
+  if (startDate && endDate) {
+    filter.createdAt = {
+      $gte: new Date(startDate), // Greater than or equal to startDate
+      $lte: new Date(endDate), // Less than or equal to endDate
+    };
+  }
+
+  const orders = await Order.find(filter)
     .populate({
       path: 'meals.meal',
       model: 'Meal',
