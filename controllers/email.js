@@ -47,8 +47,6 @@ exports.sendOrderNotificationEmail = async (order) => {
   try {
     const formattedDate = new Date(order?.createdAt).toLocaleString();
 
-    console.log('Order:', order);
-
     // Stylish HTML template
     const htmlTemplate = `
       <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 25px; border-radius: 10px; background: #f7f7f7;">
@@ -57,7 +55,7 @@ exports.sendOrderNotificationEmail = async (order) => {
        alt="TiffinPin Logo" 
        style="height: 50px; width: auto; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;">
 
-        <h1 style="color: #fff; margin: 0; font-size: 24px;">🎉 New Order Alert!</h1>
+        <h1 style="color: #fff; margin: 0; font-size: 24px;">New Order Alert!</h1>
         </div>
 
         <div style="padding: 25px; background: white; border-radius: 0 0 10px 10px;">

@@ -275,56 +275,6 @@ exports.getUserOrders = catchAsync(async (req, res, next) => {
 exports.getAllOrders = catchAsync(async (req, res) => {
   const { startDate, endDate } = req.query;
 
-  console.log('Received Query Params:', { startDate, endDate });
-
-  await sendOrderNotificationEmail({
-    _id: {
-      $oid: '67a9e99a262459f08075440c',
-    },
-    user: {
-      $oid: '67a5c669f9ced7f054e7e589',
-    },
-    address: {
-      $oid: '67a7d47287385d1ea90bd146',
-    },
-    meals: [
-      {
-        meal: {
-          $oid: '67a534df5630ad57ef9c51ae',
-        },
-        quantity: 1,
-        _id: {
-          $oid: '67a9e99a262459f08075440d',
-        },
-      },
-      {
-        meal: {
-          $oid: '67a89a8de70a0c728a61bc06',
-        },
-        quantity: 1,
-        _id: {
-          $oid: '67a9e99a262459f08075440e',
-        },
-      },
-    ],
-    dishes: [],
-    time: '11:57:14',
-    status: 'Delivered',
-    payment_method: 'COD',
-    price: 145,
-    amount: 145,
-    date: {
-      $date: '2025-02-10T11:57:14.292Z',
-    },
-    timstamp: {
-      $date: '2025-02-10T11:57:14.292Z',
-    },
-    createdAt: {
-      $date: '2025-02-10T11:57:14.292Z',
-    },
-    __v: 0,
-  });
-
   // Create filter object
   let filter = {};
   if (startDate && endDate) {
