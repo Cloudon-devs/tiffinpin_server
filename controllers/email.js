@@ -90,7 +90,7 @@ exports.sendOrderNotificationEmail = async (order) => {
             <p style="margin: 5px 0;">📞 ${order?.address?.reciever_mobile}</p>
           </div>
 
-          <a href="https://www.tiffinpin.com/seller/orders/${order?._id}" 
+          <a href="https://www.tiffinpin.com/seller/orders" 
              style="display: inline-block; width: 92%; background: #4caf50; color: white; 
                     text-align: center; padding: 15px; border-radius: 8px; text-decoration: none; 
                     font-weight: bold; margin-top: 20px;">
