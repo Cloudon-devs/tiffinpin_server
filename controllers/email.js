@@ -53,7 +53,11 @@ exports.sendOrderNotificationEmail = async (order) => {
     const htmlTemplate = `
       <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 25px; border-radius: 10px; background: #f7f7f7;">
         <div style="background: #2b2d3a; padding: 20px; border-radius: 10px 10px 0 0; text-align: center;">
-          <h1 style="color: #fff; margin: 0; font-size: 24px;">🎉 New Order Alert!</h1>
+          <img src="https://www.tiffinpin.com/drawables/site_logo_small.png" 
+       alt="TiffinPin Logo" 
+       style="height: 50px; width: auto; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;">
+
+        <h1 style="color: #fff; margin: 0; font-size: 24px;">🎉 New Order Alert!</h1>
         </div>
 
         <div style="padding: 25px; background: white; border-radius: 0 0 10px 10px;">
