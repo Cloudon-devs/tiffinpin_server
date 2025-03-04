@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken');
 exports.getAllUsers = catchAsync(async (req, res) => {
   const { startDate, endDate } = req.query;
 
+  console.log('Received Query Params:', { startDate, endDate });
+
   // Create filter object
   let filter = {};
   if (startDate && endDate) {
@@ -16,15 +18,23 @@ exports.getAllUsers = catchAsync(async (req, res) => {
     };
   }
 
-  const users = await User.find(filter);
+  try {
+    const users = await User.find(filter);
 
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: {
-      users,
-    },
-  });
+    res.status(200).json({
+      status: 'success',
+      results: users.length,
+      data: {
+        users,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Internal server error',
+    });
+  }
 });
 
 exports.getUser = catchAsync(async (req, res) => {

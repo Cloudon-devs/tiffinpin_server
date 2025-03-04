@@ -9,7 +9,7 @@ const generatePresignedUrl = (key, expiresIn = 60 * 5) => {
   };
   const uploadUrl = s3.getSignedUrl('getObject', signedUrlParams);
 
-  console.log('Generated pre-signed URL:', uploadUrl);
+  // console.log('Generated pre-signed URL:', uploadUrl);
   return uploadUrl;
 };
 

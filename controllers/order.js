@@ -7,6 +7,7 @@ const User = require('../models/User');
 const Coupon = require('../models/Coupon');
 const admin = require('firebase-admin');
 const { generatePresignedUrl } = require('../utils/s3');
+const { sendOrderNotificationEmail } = require('./email');
 // const serviceAccount = require('../../credentials/firebase_keys.json');
 
 // Initialize Firebase instance
@@ -169,13 +170,36 @@ exports.createCodOrder = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(req.user.id, {
     $push: { coupons: newCoupon._id },
   });
-  // Send push notification
+
+  /* 
+    Email notifications
+  */
+  // Populate necessary fields for email
+  const populatedOrder = await Order.findById(newOrder._id)
+    .populate('user')
+    .populate('address')
+    .populate({
+      path: 'meals.meal',
+      model: 'Meal',
+    })
+    .populate({
+      path: 'dishes.dish',
+      model: 'Dish',
+    });
+  
+  console.log('Populated Order:', populatedOrder);
+
+  await sendOrderNotificationEmail(populatedOrder);
+  
+  /* 
+    Push notifications
+  */
   const message = {
     notification: {
       title: 'New Order Received',
       body: 'You have a new order. Please check your dashboard.',
     },
-    token: 'FCM_TOKEN', // Replace with the actual FCM token
+    token: 'flexkz1_XYovgupPxDSq6n:APA91bHZyxpkuhu19lOh8kwWe77-H17tKJSwaKAkNBOSqueJBJqtp0DdrJCfhS6XuCO9nll49yYCx0gtvqpoiBXT3hS0uu7rK742pN5xuYDv00C0n6kJRv0', // Replace with the actual FCM token
   };
 
   admin
@@ -251,6 +275,56 @@ exports.getUserOrders = catchAsync(async (req, res, next) => {
 exports.getAllOrders = catchAsync(async (req, res) => {
   const { startDate, endDate } = req.query;
 
+  console.log('Received Query Params:', { startDate, endDate });
+
+  await sendOrderNotificationEmail({
+    _id: {
+      $oid: '67a9e99a262459f08075440c',
+    },
+    user: {
+      $oid: '67a5c669f9ced7f054e7e589',
+    },
+    address: {
+      $oid: '67a7d47287385d1ea90bd146',
+    },
+    meals: [
+      {
+        meal: {
+          $oid: '67a534df5630ad57ef9c51ae',
+        },
+        quantity: 1,
+        _id: {
+          $oid: '67a9e99a262459f08075440d',
+        },
+      },
+      {
+        meal: {
+          $oid: '67a89a8de70a0c728a61bc06',
+        },
+        quantity: 1,
+        _id: {
+          $oid: '67a9e99a262459f08075440e',
+        },
+      },
+    ],
+    dishes: [],
+    time: '11:57:14',
+    status: 'Delivered',
+    payment_method: 'COD',
+    price: 145,
+    amount: 145,
+    date: {
+      $date: '2025-02-10T11:57:14.292Z',
+    },
+    timstamp: {
+      $date: '2025-02-10T11:57:14.292Z',
+    },
+    createdAt: {
+      $date: '2025-02-10T11:57:14.292Z',
+    },
+    __v: 0,
+  });
+
   // Create filter object
   let filter = {};
   if (startDate && endDate) {
@@ -259,6 +333,8 @@ exports.getAllOrders = catchAsync(async (req, res) => {
       $lte: new Date(endDate), // Less than or equal to endDate
     };
   }
+
+  console.log(filter);
 
   const orders = await Order.find(filter)
     .populate({
