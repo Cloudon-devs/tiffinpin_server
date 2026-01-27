@@ -186,11 +186,11 @@ exports.createCodOrder = catchAsync(async (req, res, next) => {
       path: 'dishes.dish',
       model: 'Dish',
     });
-  
+
   console.log('Populated Order:', populatedOrder);
 
   await sendOrderNotificationEmail(populatedOrder);
-  
+
   /* 
     Push notifications
   */
