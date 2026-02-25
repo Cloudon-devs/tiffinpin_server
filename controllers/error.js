@@ -34,6 +34,7 @@ const sendErrorProd = (err, res) => {
       message: err.message,
     });
   } else {
+    console.log("Error coming: ", err)
     // 1) Log err
     console.log('ERROR 💥');
     // 2) Send generic message
