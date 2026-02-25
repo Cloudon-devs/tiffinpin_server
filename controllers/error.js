@@ -28,13 +28,15 @@ const sendErrorDev = (err, res) => {
 };
 
 const sendErrorProd = (err, res) => {
+  console.log("Error coming: operatiojs: ", err);
+
   if (err.isOperational) {
     res.status(err.statusCode).json({
       status: err.status,
       message: err.message,
     });
   } else {
-    console.log("Error coming: ", err)
+    console.log("Error coming: ", err);
     // 1) Log err
     console.log('ERROR 💥');
     // 2) Send generic message
